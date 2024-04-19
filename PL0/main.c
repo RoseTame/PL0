@@ -1,33 +1,65 @@
-#include<stdio.h>
-#include<string.h>
 #include"pl0.h"
 
 int main(void) {
     init();
-    lexicalAnalysis(); // ´Ê·¨·ÖÎö
+    lexicalAnalysis(); // è¯æ³•åˆ†æ
     return 0;
 }
 
-void init() { // ³õÊ¼»¯º¯Êı start
-    // ±£Áô×Ö
+void init() { // åˆå§‹åŒ–å‡½æ•° start
+    /* è®¾ç½®å•å­—ç¬¦ç¬¦å·å€¼ */
+    for (int i = 0; i < 256; i++) {
+        ssym[i] = nul;
+    }
+    ssym['+'] = plus;
+    ssym['-'] = minus;
+    ssym['*'] = times;
+    ssym['/'] = slash;
+    ssym['('] = lparen;
+    ssym[')'] = rparen;
+    ssym['='] = eql;
+    ssym[','] = comma;
+    ssym['.'] = period;
+    ssym['#'] = neq;
+    ssym[';'] = semicolon;
+
+    /* è®¾ç½®ä¿ç•™å­—åå­—,æŒ‰ç…§å­—æ¯é¡ºåºï¼Œä¾¿äºæŠ˜åŠæŸ¥æ‰¾ */
     strcpy(keyWord[0], "begin");
     strcpy(keyWord[1], "call");
     strcpy(keyWord[2], "const");
     strcpy(keyWord[3], "do");
     strcpy(keyWord[4], "end");
     strcpy(keyWord[5], "if");
-    strcpy(keyWord[6], "odd");
-    strcpy(keyWord[7], "procedure");
-    strcpy(keyWord[8], "read");
-    strcpy(keyWord[9], "then");
-    strcpy(keyWord[10], "var");
-    strcpy(keyWord[11], "while");
-    strcpy(keyWord[12], "write");
-    strcpy(keyWord[13], "studentid");
-    strcpy(keyWord[14], "name");
-    strcpy(keyWord[15], "Jenny");
+    strcpy(keyWord[6], "Jenny");
+    strcpy(keyWord[7], "name");
+    strcpy(keyWord[8], "odd");
+    strcpy(keyWord[9], "procedure");
+    strcpy(keyWord[10], "read");
+    strcpy(keyWord[11], "studentid");
+    strcpy(keyWord[12], "then");
+    strcpy(keyWord[13], "var");
+    strcpy(keyWord[14], "while");
+    strcpy(keyWord[15], "write");
 
-    // ÔËËã·û
+    /* è®¾ç½®ä¿ç•™å­—ç¬¦å·å€¼ */
+    wsym[0] = beginsym;
+    wsym[1] = callsym;
+    wsym[2] = constsym;
+    wsym[3] = dosym;
+    wsym[4] = endsym;
+    wsym[5] = ifsym;
+    wsym[6] = jennysym;
+    wsym[7] = namesym;
+    wsym[8] = oddsym;
+    wsym[9] = procsym;
+    wsym[10] = readsym;
+    wsym[11] = studentidsym;
+    wsym[12] = thensym;
+    wsym[13] = varsym;
+    wsym[14] = whilesym;
+    wsym[15] = writesym;
+
+    /* è®¾ç½®è¿ç®—ç¬¦å· */
     strcpy(operator[0], "+");
     strcpy(operator[1], "-");
     strcpy(operator[2], "*");
@@ -40,142 +72,186 @@ void init() { // ³õÊ¼»¯º¯Êı start
     strcpy(operator[9], ">=");
     strcpy(operator[10], ":=");
 
-    // ½ç·û
-    delimiter[0] = '(';
-    delimiter[1] = ')';
-    delimiter[2] = ',';
-    delimiter[3] = ';';
-    delimiter[4] = '.';
-} // ³õÊ¼»¯º¯Êı end
+    /* è®¾ç½®ç•Œç¬¦å· */
+    strcpy(delimiter[0], "(");
+    strcpy(delimiter[1], ")");
+    strcpy(delimiter[2], ",");
+    strcpy(delimiter[3], ";");
+    strcpy(delimiter[4], ".");
+} // åˆå§‹åŒ–å‡½æ•° end
 
-bool lexicalAnalysis() { // ´Ê·¨·ÖÎöº¯Êı start
-    num = 0;
-    fSource = fopen("source.txt", "r"); // ¶ÁÈ¡Ô´³ÌĞòÎÄ¼ş
-    fLexical = fopen("lexical.txt", "w"); // ´Ê·¨·ÖÎö½á¹ûÎÄ¼ş
+int lexicalAnalysis() {
+    fsource = fopen("source.txt", "r"); // è¯»å–æºç¨‹åºæ–‡ä»¶
+    flexical = fopen("lexical.txt", "w"); // è¯æ³•åˆ†æç»“æœæ–‡ä»¶
 
-    if (!fSource) {
+    if (!fsource) {
         printf("Can't open the source file!\n");
-        return false;
+        return -1;
     }
 
-    if (!fLexical) {
+    if (!flexical) {
         printf("Can't open the lexical file!\n");
-        return false;
+        return -1;
     }
-    while ((ch = fgetc(fSource)) != EOF) {
-        if (isEmpty(ch)) { // ¿Õ¸ñ
-            continue;
+    ll = 0;
+    cc = 0;
+    ch = ' ';
+    index = 0;
+    while (1) {
+        getsym();
+        if (sym == nul) {
+            printf("%d %s %s\n", ++index, "éæ³•", str);
+            fprintf(flexical, "%d %s %s\n", index, "éæ³•", str);
         }
-        else if (isLetter(ch)) { // ×ÖÄ¸
-            char str[100];
-            int i = 0;
-            str[i++] = ch;
-            while ((ch = fgetc(fSource)) != EOF && (isLetter(ch) || isDigit(ch))) {
-                str[i++] = ch;
-            }
-            str[i] = '\0';
-            if (isKeyWord(str)) {
-                printf("%d %s %s\n", ++num, "±£Áô×Ö", str);
-                fprintf(fLexical, "%d %s %s\n", num, "±£Áô×Ö", str);
-            }
-            else {
-                printf("%d %s %s\n", ++num, "±êÊ¶·û", str);
-                fprintf(fLexical, "%d %s %s\n", num, "±êÊ¶·û", str);
-            }
-            ungetc(ch, fSource);
+        else if (sym == ident) {
+            printf("%d %s %s\n", ++index, "æ ‡è¯†ç¬¦", str);
+            fprintf(flexical, "%d %s %s\n", index, "æ ‡è¯†ç¬¦", str);
         }
-        else if (isDigit(ch)) { // Êı×Ö
-            char str[100];
-            int i = 0;
-            str[i++] = ch;
-            while ((ch = fgetc(fSource)) != EOF && isDigit(ch)) {
-                str[i++] = ch;
-            }
-            str[i] = '\0';
-            printf("%d %s %s\n", ++num, "Êı×Ö", str);
-            fprintf(fLexical, "%d %s %s\n", num, "Êı×Ö", str);
-            ungetc(ch, fSource);
+        else if (sym == number) {
+            printf("%d %s %d\n", ++index, "æ•°å­—", num);
+            fprintf(flexical, "%d %s %d\n", index, "æ•°å­—", num);
         }
-        else if (isOperator(ch)) { // ÔËËã·û
-            char str[100];
-            int i = 0;
-            str[i++] = ch;
-            if ((ch = fgetc(fSource)) != EOF) {
-                str[i++] = ch;
-                str[i] = '\0';
-                if (isOperator(ch)) {
-                    printf("%d %s %s\n", ++num, "ÔËËã·û", str);
-                    fprintf(fLexical, "%d %s %s\n", num, "ÔËËã·û", str);
-                }
-                else {
-                    str[i - 1] = '\0';
-                    printf("%d %s %s\n", ++num, "ÔËËã·û", str);
-                    fprintf(fLexical, "%d %s %s\n", num, "ÔËËã·û", str);
-                    ungetc(ch, fSource);
-                }
+        else if (sym >= 3 && sym <= 13) {
+            printf("%d %s %s\n", ++index, "è¿ç®—ç¬¦", operator[sym - 3]);
+            fprintf(flexical, "%d %s %s\n", index, "è¿ç®—ç¬¦", operator[sym - 3]);
+        }
+        else if (sym >= 14 && sym <= 18) {
+            printf("%d %s %s\n", ++index, "ç•Œç¬¦", delimiter[sym - 14]);
+            fprintf(flexical, "%d %s %s\n", index, "ç•Œç¬¦", delimiter[sym - 14]);
+        }
+        else if (sym >= 19 && sym <= 34) {
+            printf("%d %s %s\n", ++index, "ä¿ç•™å­—", keyWord[sym - 19]);
+            fprintf(flexical, "%d %s %s\n", index, "ä¿ç•™å­—", keyWord[sym - 19]);
+        }
+        if(sym == period) {
+            break;
+        }
+    }
+}
+
+int getsym() {
+    // è¯æ³•åˆ†æå‡½æ•° start
+    int i, j, k;
+    while (ch == ' ' || ch == 10 || ch == 9) { // è·³è¿‡ç©ºæ ¼ã€æ¢è¡Œã€åˆ¶è¡¨ç¬¦
+        getchdo;
+    }
+    if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') { // å¤„ç†å…³é”®å­—æˆ–æ ‡è¯†ç¬¦
+        k = 0;
+        do {
+            if (k < al) {
+                str[k++] = ch;
             }
-            else {
-                str[i] = '\0';
-                printf("%d %s, %s\n", ++num, "ÔËËã·û", str);
-                fprintf(fLexical, "%d %s %s\n", num, "ÔËËã·û", str);
+            getchdo;
+        }
+        while (ch >= 'a' && ch <= 'z' || ch >= '0' && ch <= '9');
+        str[k] = 0;
+        i = 0;
+        j = norw - 1;
+        do {
+            k = (i + j) / 2;
+            if (strcmp(str, keyWord[k]) <= 0) {
+                j = k - 1;
+            }
+            if (strcmp(str, keyWord[k]) >= 0) {
+                i = k + 1;
             }
         }
-        else if (isDelimiter(ch)) { // ½ç·û
-            char str[100];
-            str[0] = ch;
-            str[1] = '\0';
-            printf("%d %s %s\n", ++num, "½ç·û", str);
-            fprintf(fLexical, "%d %s %s\n", num, "½ç·û", str);
-            if(str[0] == '.'){
-                break;
-            }
+        while (i <= j);
+        if (i - 1 > j) {
+            sym = wsym[k];
         }
         else {
-            printf("%d %s, %c\n", ++num, "·Ç·¨", ch);
-            fprintf(fLexical, "%d %s %c\n", num, "·Ç·¨", ch);
-            return false;
+            sym = ident;
         }
     }
-    fclose(fSource); // ¹Ø±ÕÔ´³ÌĞòÎÄ¼ş
-    fclose(fLexical); // ¹Ø±Õ´Ê·¨·ÖÎö½á¹ûÎÄ¼ş
-    return true;
-} // ´Ê·¨·ÖÎöº¯Êı end
+    else {
+        if (ch >= '0' && ch <= '9') {
+            k = 0;
+            num = 0;
+            sym = number;
+            do {
+                num = 10 * num + ch - '0';
+                k++;
+                getchdo;
+            }
+            while (ch >= '0' && ch <= '9');
+        }
+        else {
+            if (ch == ':') { // å¤„ç†èµ‹å€¼ç¬¦å·
+                str[0] = ch;
+                getchdo;
+                if (ch == '=') {
+                    sym = becomes;
+                }
+                else {
+                    str[1] = ch;
+                    str[2] = 0;
+                    sym = nul;
+                }
+            }
+            else {
+                if (ch == '<') {
+                    getchdo;
+                    if (ch == '=') {
+                        sym = leq;
+                        getchdo;
+                    }
+                    else {
+                        sym = lss;
+                    }
+                }
+                else {
+                    if (ch == '>') {
+                        getchdo;
+                        if (ch == '=') {
+                            sym = geq;
+                            getchdo;
+                        }
+                        else {
+                            sym = gtr;
+                        }
+                    }
 
-bool isEmpty(char ch) {
-    return ch == ' ' || ch == '\t' || ch == '\n';
-} // ÅĞ¶ÏÊÇ·ñÎª¿Õ¸ñ
-
-bool isLetter(char ch) {
-    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
-} // ÅĞ¶ÏÊÇ·ñÎª×ÖÄ¸
-
-bool isDigit(char ch) {
-    return ch >= '0' && ch <= '9';
-} // ÅĞ¶ÏÊÇ·ñÎªÊı×Ö
-
-bool isKeyWord(char* str) {
-    for (int i = 0; i < keyWordNum; i++) {
-        if (strcmp(str, keyWord[i]) == 0) {
-            return true;
+                    else {
+                        if(!(ch & 0x80)) {
+                            sym = ssym[ch];
+                            if (sym != period) {
+                                getchdo;
+                            }
+                        }
+                        else {
+                            k = 0;
+                            while(ch & 0x80) {
+                                str[k++] = ch;
+                                getchdo;
+                            }
+                            str[k] = 0;
+                            sym = nul;
+                        }
+                    }
+                }
+            }
         }
     }
-    return false;
-} // ÅĞ¶ÏÊÇ·ñÎª±£Áô×Ö
+    return 0;
+} // è¯æ³•åˆ†æå‡½æ•° end
 
-bool isOperator(char ch) {
-    for (int i = 0; i < operatorNum; i++) {
-        if (ch == operator[i][0]) {
-            return true;
+int getch() { // è¯»å–ä¸€è¡Œ
+    if (cc == ll) { // å½“å‰è¡Œè¯»å–å®Œæ¯•, è¯»å–ä¸‹ä¸€è¡Œ
+        if (feof(fsource)) {
+            return -1;
+        }
+        ll = 0;
+        cc = 0;
+        ch = ' ';
+        while (ch != 10) {
+            if (fscanf(fsource, "%c", &ch) == EOF) {
+                line[ll] = 0;
+                break;
+            }
+            line[ll++] = ch;
         }
     }
-    return false;
-} // ÅĞ¶ÏÊÇ·ñÎªÔËËã·û
-
-bool isDelimiter(char ch) {
-    for (int i = 0; i < delimiterNum; i++) {
-        if (ch == delimiter[i]) {
-            return true;
-        }
-    }
-    return false;
-} // ÅĞ¶ÏÊÇ·ñÎª½ç·û
+    ch = line[cc++];
+    return 0;
+}

@@ -13,7 +13,8 @@ begin
 			write(2*c);
 			read(b)
 		end
-studentid: 201812345
-name: Jenny
+studentid： 201812345
+name：Jenny
 end.
-name: Mike
+name：Mike
+end.

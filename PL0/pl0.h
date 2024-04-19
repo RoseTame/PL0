@@ -7,33 +7,51 @@
 
 /* PL/0 编译系统C版本头文件 pl0.h */
 
-typedef enum bool {
-    false,
-    true
-} bool; // 自定义bool类型
+#include<stdio.h>
+#include<string.h>
+#include <locale.h>
+#include <wchar.h>
+#include <wctype.h>
 
-#define keyWordNum 16 // 保留字个数
-#define keyWordLength 10 // 保留字最大长度
-#define operatorNum 11 // 运算符个数
-#define operatorLength 3 // 运算符最大长度
-#define delimiterNum 5 // 界符个数
-#define delimiterLength 3 // 界符最大长度
+#define norw 16 // 保留字个数
+#define al 10 // 保留字或标识符的最大长度
+#define nmax 14 // 数字的最大位数
 
-FILE* fSource; // 源程序文件指针
-FILE* fLexical; // 词法分析结果文件指针
-char keyWord[keyWordNum][keyWordLength]; // 保留字表
-char operator[operatorNum][operatorLength]; // 运算符表
-char delimiter[delimiterNum]; // 界符表
+enum symbol { // 符号
+    nul, // 非法字符 0
+    ident, // 标识符 1
+    number, // 数字 2
+    plus, minus, times, slash, eql, neq, lss, leq, gtr, geq, becomes, // 运算符 3-13
+    lparen, rparen, comma, semicolon, period, // 界符 14-18
+    // 保留字 19-34
+    beginsym, callsym, constsym, dosym, endsym, ifsym, jennysym, namesym, oddsym, procsym,
+    readsym, studentidsym, thensym, varsym, whilesym, writesym
+};
+
+#define symnum 32 // 符号个数
+
+#define getchdo if(getch() == -1) return -1;
+
+FILE* fsource; // 源程序文件指针
+FILE* flexical; // 词法分析结果文件指针
+
+char keyWord[norw][al]; // 保留字
+char operator[11][3]; // 运算符
+char delimiter[5][2]; // 界符
+enum symbol wsym[norw]; // 保留字对应的符号值
+enum symbol ssym[256]; // 单字符的符号值
+enum symbol sym; // 当前的符号
 char ch; // 当前读入的字符
-int num; // 当前读取的索引号
+char line[81]; // 当前读取的行
+int ll; // 当前行的长度
+int cc; // 当前字符的索引号
+char str[al + 1]; // 当前读取的字符串
+int num; // 当前读入的数字
+int index; // 词法分析结果的索引号
 
 void init(); // 初始化函数
-bool lexicalAnalysis(); // 词法分析函数
-bool isEmpty(char ch); // 判断是否为空格
-bool isLetter(char ch); // 判断是否为字母
-bool isDigit(char ch); // 判断是否为数字
-bool isKeyWord(char* str); // 判断是否为保留字
-bool isOperator(char ch); // 判断是否为运算符
-bool isDelimiter(char ch); // 判断是否为界符
+int lexicalAnalysis(); // 词法分析函数
+int getsym(); // 读取一个符号
+int getch(); // 读取一行
 
 #endif //PL0_H
