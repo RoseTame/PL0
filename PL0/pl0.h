@@ -30,7 +30,7 @@ enum symbol { // 符号
 
 #define symnum 32 // 符号个数
 
-#define getchdo if(getch() == -1) return -1;
+#define getchdo if(getch() == -1) return -1; // 读取一个字符
 
 FILE* fsource; // 源程序文件指针
 FILE* flexical; // 词法分析结果文件指针
@@ -40,14 +40,17 @@ char operator[11][3]; // 运算符
 char delimiter[5][2]; // 界符
 enum symbol wsym[norw]; // 保留字对应的符号值
 enum symbol ssym[256]; // 单字符的符号值
-enum symbol sym; // 当前的符号
+
 char ch; // 当前读入的字符
 char line[81]; // 当前读取的行
 int ll; // 当前行的长度
 int cc; // 当前字符的索引号
-char str[al + 1]; // 当前读取的字符串
-int num; // 当前读入的数字
 int index; // 词法分析结果的索引号
+
+enum symbol sym; // 当前的符号
+char a[al + 1]; // 当前读取的标识符
+char str[al+1]; // 当前读取的字符串
+int num; // 当前读入的数字
 
 void init(); // 初始化函数
 int lexicalAnalysis(); // 词法分析函数

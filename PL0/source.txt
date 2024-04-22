@@ -5,14 +5,6 @@ procedure p;
 		c:=b+a;
 	end;
 
-begin
-	read(b);
-	while b#0 do
-		begin
-			call p;
-			write(2*c);
-			read(b)
-		end
 studentid： 201812345
 name：Jenny
 end.
